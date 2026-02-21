@@ -1,0 +1,33 @@
+{
+  "replacements": {
+    "#FF4444": "#0EA5A4",
+    "#CC3333": "#0B6E6C",
+    "#FF6B6B": "#48C7C5",
+    "#FF9999": "#48C7C5",
+    "#999999": "#64748B",
+    "#666666": "#64748B",
+    "#F5F5F5": "#F8FAFB",
+    "#333333": "#1E293B",
+    "#E8E8E8": "#E2E8F0",
+    "text-[#FF4444]": "text-[#0EA5A4]",
+    "text-[#CC3333]": "text-[#0B6E6C]",
+    "text-[#FF6B6B]": "text-[#48C7C5]",
+    "text-[#999999]": "text-[#64748B]",
+    "text-[#666666]": "text-[#64748B]",
+    "text-[#333333]": "text-[#1E293B]",
+    "bg-[#FF4444]": "bg-[#0EA5A4]",
+    "bg-[#CC3333]": "bg-[#0B6E6C]",
+    "bg-[#F5F5F5]": "bg-[#F8FAFB]",
+    "bg-[#E8E8E8]": "bg-[#E2E8F0]",
+    "from-[#FF4444]": "from-[#0EA5A4]",
+    "to-[#CC3333]": "to-[#0B6E6C]",
+    "from-[#999999]": "from-[#64748B]",
+    "to-[#666666]": "to-[#1E293B]",
+    "border-[#999999]": "border-[#E2E8F0]",
+    "border-[#FF4444]": "border-[#0EA5A4]",
+    "hover:text-[#FF4444]": "hover:text-[#0EA5A4]",
+    "hover:text-[#CC3333]": "hover:text-[#0B6E6C]",
+    "shadow-[#FF4444]": "shadow-[#0EA5A4]",
+    "shadow-[#999999]": "shadow-[#E2E8F0]"
+  }
+}
