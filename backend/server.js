@@ -8,7 +8,21 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://life-vault-dusky.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const AI_MODEL = 'qwen/qwen3-235b-a22b-thinking-2507';
 
@@ -18,10 +32,6 @@ const AI_MODEL = 'qwen/qwen3-235b-a22b-thinking-2507';
 const userStore = new Map();
 
 // ─── Middleware ─────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: FRONTEND_URL,
-  credentials: true,
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
