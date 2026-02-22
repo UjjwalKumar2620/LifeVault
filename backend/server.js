@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+// Load .env for local dev — Railway injects env vars directly, so this is a no-op in production
 dotenv.config();
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;

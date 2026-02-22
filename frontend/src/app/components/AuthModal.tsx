@@ -12,6 +12,22 @@ import { ArrowLeft, Stethoscope, HeartPulse } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+const BACKEND_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_BACKEND_URL) || 'http://localhost:3001';
+
+/** Silently register/sync user with the Express backend (in-memory store). */
+async function registerWithBackend(uid: string, email: string | null, name: string | null) {
+  try {
+    await fetch(`${BACKEND_URL}/api/register-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, email, name }),
+    });
+  } catch {
+    // Non-blocking — app still works even if backend is momentarily down
+    console.warn('Backend registration skipped (server unreachable)');
+  }
+}
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -43,6 +59,8 @@ export function AuthModal({ isOpen, onClose, mode, onSwitchMode }: AuthModalProp
         { name: user.displayName, email: user.email, userType, createdAt: new Date() },
         { merge: true }
       );
+      // Register with backend so AI endpoint recognises the user
+      await registerWithBackend(user.uid, user.email, user.displayName);
       onClose();
       navigate("/dashboard");
     } catch (err: any) {
@@ -59,8 +77,12 @@ export function AuthModal({ isOpen, onClose, mode, onSwitchMode }: AuthModalProp
         await setDoc(doc(db, "users", cred.user.uid), {
           name, email, userType, createdAt: new Date(),
         });
+        // Register with backend
+        await registerWithBackend(cred.user.uid, email, name);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Re-register on login (in case server restarted and lost memory)
+        await registerWithBackend(cred.user.uid, cred.user.email, cred.user.displayName);
       }
       onClose();
       navigate("/dashboard");
@@ -112,8 +134,8 @@ export function AuthModal({ isOpen, onClose, mode, onSwitchMode }: AuthModalProp
                     type="button"
                     onClick={() => setUserType("patient")}
                     className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${userType === "patient"
-                        ? "border-blue-500 bg-blue-50 text-blue-600"
-                        : "border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-300"
+                      ? "border-blue-500 bg-blue-50 text-blue-600"
+                      : "border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-300"
                       }`}
                   >
                     <HeartPulse className="w-6 h-6" />
@@ -123,8 +145,8 @@ export function AuthModal({ isOpen, onClose, mode, onSwitchMode }: AuthModalProp
                     type="button"
                     onClick={() => setUserType("doctor")}
                     className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${userType === "doctor"
-                        ? "border-blue-500 bg-blue-50 text-blue-600"
-                        : "border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-300"
+                      ? "border-blue-500 bg-blue-50 text-blue-600"
+                      : "border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-300"
                       }`}
                   >
                     <Stethoscope className="w-6 h-6" />

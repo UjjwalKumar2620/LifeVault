@@ -4,10 +4,11 @@ import {
   MapPin, Phone, Loader2, TriangleAlert,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { auth } from '../../firebase';
 
-/* ─── OpenRouter config ──────────────────────────────────────── */
-const OPENROUTER_API_KEY = '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';
-const MODEL = 'qwen/qwen3-235b-a22b-thinking-2507';
+/* ─── Backend URL ────────────────────────────────────────────── */
+// AI calls go through our own backend so the OpenRouter key stays server-side.
+const BACKEND_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_BACKEND_URL) || 'http://localhost:3001';
 
 const SYSTEM_PROMPT = `You are MedAI, an expert medical AI assistant built into LifeVault, a personal health management app.
 
@@ -141,8 +142,12 @@ export function AIChatDiagnosis() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  /* ── Call OpenRouter ── */
+  /* ── Call backend AI proxy (OpenRouter key stays server-side) ── */
   const callAI = async (userText: string, currentMessages: Message[]): Promise<string> => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('Not logged in. Please sign in and try again.');
+
+    // Build message array for backend
     const apiMessages: { role: string; content: string }[] = [
       { role: 'system', content: SYSTEM_PROMPT },
     ];
@@ -151,23 +156,18 @@ export function AIChatDiagnosis() {
     });
     apiMessages.push({ role: 'user', content: userText });
 
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch(`${BACKEND_URL}/api/ai/chat`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://lifevault.app',
-        'X-Title': 'LifeVault Medical AI',
-      },
-      body: JSON.stringify({ model: MODEL, messages: apiMessages, max_tokens: 500, temperature: 0.5 }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, messages: apiMessages }),
     });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `API error ${res.status}`);
+      throw new Error(err?.error || `Server error ${res.status}`);
     }
     const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response. Please try again.';
+    return data.message ?? 'Sorry, I could not generate a response. Please try again.';
   };
 
   /* ── Send ── */
@@ -272,8 +272,8 @@ export function AIChatDiagnosis() {
                   className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'ai'
-                      ? 'bg-gradient-to-br from-blue-500 to-blue-700'
-                      : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-700'
+                    : 'bg-gradient-to-br from-gray-400 to-gray-500'
                     }`}>
                     {msg.role === 'ai'
                       ? <Bot className="w-4 h-4 text-white" />
@@ -282,8 +282,8 @@ export function AIChatDiagnosis() {
 
                   <div className={`flex-1 flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                     <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${msg.role === 'ai'
-                        ? 'bg-white border border-blue-100 text-gray-800 rounded-tl-sm'
-                        : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-tr-sm'
+                      ? 'bg-white border border-blue-100 text-gray-800 rounded-tl-sm'
+                      : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-tr-sm'
                       }`}>
                       <div className="space-y-0.5">
                         <FormatContent text={msg.content} />
@@ -358,8 +358,8 @@ export function AIChatDiagnosis() {
                 key={item.id}
                 onClick={() => loadHistory(item)}
                 className={`w-full text-left px-3 py-3 rounded-xl transition group border ${activeHistoryId === item.id
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-slate-50 hover:bg-blue-50 border-transparent hover:border-blue-100 text-gray-700'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-slate-50 hover:bg-blue-50 border-transparent hover:border-blue-100 text-gray-700'
                   }`}
               >
                 <p className={`text-sm font-medium truncate ${activeHistoryId === item.id ? 'text-blue-700' : 'group-hover:text-blue-600'}`}>
