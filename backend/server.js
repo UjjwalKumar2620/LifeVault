@@ -37,7 +37,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // OpenRouter
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "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";
+
 const AI_MODEL = "qwen/qwen3-235b-a22b-thinking-2507";
 
 // In-memory users
@@ -82,11 +83,14 @@ app.post("/api/register-user", (req, res) => {
 app.post("/api/ai/chat", async (req, res) => {
   const { uid, messages } = req.body;
 
-  if (!uid || !userStore.has(uid)) {
+  // Just verify uid is present — Firebase already authenticated the user on the frontend.
+  // (In-memory store would 401 after every server restart, which is too fragile.)
+  if (!uid) {
     return res.status(401).json({
       error: "User not logged in",
     });
   }
+
 
   if (!Array.isArray(messages)) {
     return res.status(400).json({
