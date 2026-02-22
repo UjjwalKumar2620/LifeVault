@@ -5,7 +5,8 @@ import { auth } from "../firebase";
 import { RouterProvider } from "react-router";
 import { router } from "./routes";
 
-const API = import.meta.env.VITE_BACKEND_URL;
+const API = import.meta.env.VITE_BACKEND_URL || 'https://lifevault-production.up.railway.app';
+
 
 // Register user in backend
 async function registerUser(user: any) {

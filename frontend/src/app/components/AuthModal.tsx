@@ -12,7 +12,8 @@ import { ArrowLeft, Stethoscope, HeartPulse } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-const BACKEND_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_BACKEND_URL) || 'http://localhost:3001';
+const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'https://lifevault-production.up.railway.app';
+
 
 /** Silently register/sync user with the Express backend (in-memory store). */
 async function registerWithBackend(uid: string, email: string | null, name: string | null) {

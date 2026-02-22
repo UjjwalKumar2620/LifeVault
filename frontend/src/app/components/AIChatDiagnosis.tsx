@@ -8,7 +8,8 @@ import { auth } from '../../firebase';
 
 /* ─── Backend URL ────────────────────────────────────────────── */
 // AI calls go through our own backend so the OpenRouter key stays server-side.
-const BACKEND_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_BACKEND_URL) || 'http://localhost:3001';
+const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'https://lifevault-production.up.railway.app';
+
 
 const SYSTEM_PROMPT = `You are MedAI, an expert medical AI assistant built into LifeVault, a personal health management app.
 
